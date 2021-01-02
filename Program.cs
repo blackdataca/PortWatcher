@@ -109,7 +109,6 @@ namespace PortWatcher
 
             IPGlobalProperties ipProperties = IPGlobalProperties.GetIPGlobalProperties();
 
-            // IPEndPoint[] endPoints = ipProperties.GetActiveTcpListeners();
             var oldConnections = new List<string>();
 
 
