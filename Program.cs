@@ -10,7 +10,9 @@ namespace PortWatcher
 {
     class Program
     {
-
+        /// <summary>
+        /// Show command line hint
+        /// </summary>
         static void ShowHelp()
         {
 
@@ -23,14 +25,19 @@ namespace PortWatcher
             Console.WriteLine("-ssl = Enable SSL for Smtp server");
         }
 
-        static string[] _ports;
-        static string _email = "";
-        static string _smtpAddr = "127.0.0.1";
-        static int _smtpPort = 25;
-        static bool _enableSsl = false;
-        static string _smtpUser = "";
-        static string _smtpPass = "";
+        static string[] _ports; //List of ports to monitor
+        static string _email = ""; //Notification email address
+        static string _smtpAddr = "127.0.0.1"; //Email server address
+        static int _smtpPort = 25; //Email server port
+        static bool _enableSsl = false; //To support SSL SMTP, set to true, otherwise false
+        static string _smtpUser = ""; //SMTP server login user. "" is anonymous
+        static string _smtpPass = ""; //SMTP server password
 
+        /// <summary>
+        /// Parse command line parameters
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns>true = parameters parsed successfuly. false = one or more required parameter not set</returns>
         static bool ParseArgs(string[] args)
         {
             for (int i = 0; i < args.Length; i++)
@@ -96,7 +103,11 @@ namespace PortWatcher
         }
 
 
-
+        /// <summary>
+        /// Program entry point. Start in infinite loop until Ctrl-C to quit. Scan interval 1 second.
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
         static int Main(string[] args)
         {
             Console.WriteLine(string.Format("{0} {1}", System.Reflection.Assembly.GetExecutingAssembly().GetName().Name, System.Reflection.Assembly.GetExecutingAssembly().GetName().Version));
@@ -110,7 +121,6 @@ namespace PortWatcher
             IPGlobalProperties ipProperties = IPGlobalProperties.GetIPGlobalProperties();
 
             var oldConnections = new List<string>();
-
 
             while (true)
             {
@@ -151,12 +161,18 @@ namespace PortWatcher
                 }
                 catch (Exception ex)
                 {
+                    //Display any exception then continue 
                     Console.WriteLine(ex.ToString());
                 }
                 System.Threading.Thread.Sleep(1000);
-            }
+            } //end while
         }
 
+
+        /// <summary>
+        /// Sends email notification if email address is set
+        /// </summary>
+        /// <param name="newConnections"></param>
         static void SendNotification(List<string> newConnections)
         {
             if (string.IsNullOrEmpty(_email))

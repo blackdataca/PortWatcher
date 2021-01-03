@@ -1,6 +1,7 @@
 ﻿### Port Watcher
-# Defend your computer against hacker activities. 
+# Defend your computer against hacker activities
 Watch TCP IP and UDP ports and notify for inbound and outbound connection attempts. 
+
 # Common ports are 
 * TCP port 21 - FTP (File Transfer Protocol)
 * TCP port 22 - SSH (Secure Shell)
@@ -57,3 +58,7 @@ SynReceived	|	The local endpoint of the TCP connection has sent and received a c
 SynSent	|	The local endpoint of the TCP connection has sent the remote endpoint a segment header with the synchronize (SYN) control bit set and is waiting for a matching connection request.
 TimeWait	|	The local endpoint of the TCP connection is waiting for enough time to pass to ensure that the remote endpoint received the acknowledgement of its connection termination request.
 Unknown	|	The TCP connection state is unknown.
+
+
+
+### If you find this project interesting, please Fork and implement your ideas. Every computer watched makes hacking more difficult ☮︎
