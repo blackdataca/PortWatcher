@@ -16,13 +16,16 @@ namespace PortWatcher
         static void ShowHelp()
         {
 
-            Console.WriteLine("Usage: PortWatcher -p PortNumber [-e EmailAddress [-s SmtpSerever[:Port] [-user UserName -pass Password] [-ssl] ] ]");
+            Console.WriteLine("\nUsage: PortWatcher.exe -p PortNumber [-e EmailAddress [-s SmtpSerever[:Port] [-user UserName -pass Password] [-ssl] ] ]\n");
             Console.WriteLine("-p PortNumber,PortNumber,... = The IP or UDP port number either local or remote. No space.");
             Console.WriteLine("-e EmailAddress = Email address to receive notification");
             Console.WriteLine("-s SmtpServer:Port = Smtp server address and port. Default 127.0.0.1:25 if not specified");
             Console.WriteLine("-user Smtp User Name = User name for Smtp server");
             Console.WriteLine("-pass Smtp Password = Password for Smtp server");
             Console.WriteLine("-ssl = Enable SSL for Smtp server");
+
+            Console.Write("Press Enter to quit")
+            Console.ReadLine();
         }
 
         static string[] _ports; //List of ports to monitor
@@ -179,30 +182,38 @@ namespace PortWatcher
                 return;
 
             Console.Write("Sending email...");
-            using (MailMessage message = new MailMessage())
+            try
             {
-                SmtpClient smtp = new SmtpClient();
-                message.From = new MailAddress(_email);
-                message.To.Add(new MailAddress(_email));
-                message.Subject = string.Format("PortWatch Notification Connections {0}", newConnections.Count); //vary subject to prevent gmail topic grouping
-                smtp.Port = _smtpPort;
-                smtp.Host = _smtpAddr;
-                smtp.EnableSsl = _enableSsl;
-                smtp.UseDefaultCredentials = string.IsNullOrEmpty(_smtpUser);
-                smtp.Credentials = new NetworkCredential(_smtpUser, _smtpPass);
-                smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
-
-                message.IsBodyHtml = false;
-
-                var bodyString = new StringBuilder();
-                foreach (var conn in newConnections)
+                using (MailMessage message = new MailMessage())
                 {
-                    bodyString.AppendLine(conn);
-                }
-                message.Body = bodyString.ToString();
-                smtp.Send(message);
+                    SmtpClient smtp = new SmtpClient();
+                    message.From = new MailAddress(_email);
+                    message.To.Add(new MailAddress(_email));
+                    message.Subject = string.Format("PortWatch Notification Connections {0}", newConnections.Count); //vary subject to prevent gmail topic grouping
+                    smtp.Port = _smtpPort;
+                    smtp.Host = _smtpAddr;
+                    smtp.EnableSsl = _enableSsl;
+                    smtp.UseDefaultCredentials = string.IsNullOrEmpty(_smtpUser);
+                    smtp.Credentials = new NetworkCredential(_smtpUser, _smtpPass);
+                    smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
 
-                Console.WriteLine("Sent.");
+                    message.IsBodyHtml = false;
+
+                    var bodyString = new StringBuilder();
+                    foreach (var conn in newConnections)
+                    {
+                        bodyString.AppendLine(conn);
+                    }
+                    message.Body = bodyString.ToString();
+                    smtp.Send(message);
+
+                    Console.WriteLine("Sent.");
+                }
+            }
+            catch (Exception ex)
+            {
+                //Display any exception then continue 
+                Console.WriteLine(ex.ToString());
             }
         }
     }
