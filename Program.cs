@@ -24,7 +24,7 @@ namespace PortWatcher
             Console.WriteLine("-pass Smtp Password = Password for Smtp server");
             Console.WriteLine("-ssl = Enable SSL for Smtp server");
 
-            Console.Write("Press Enter to quit")
+            Console.Write("Press Enter to quit");
             Console.ReadLine();
         }
 

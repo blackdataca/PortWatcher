@@ -155,7 +155,7 @@
             }
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_AB80A2807F0F4029B54933EAD89CE710"
             {
-            "DefaultLocation" = "8:[ProgramFiles64Folder]\\[ProductName]"
+            "DefaultLocation" = "8:[DesktopFolder]\\[ProductName]"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -182,7 +182,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:PortWatcher 1.0.0"
         "ProductCode" = "8:{FAC62705-1406-4BF7-97B2-DC9223521BA5}"
-        "PackageCode" = "8:{E8472169-57D5-45A9-B89A-DAB978FA08B8}"
+        "PackageCode" = "8:{88EF4CE5-7B17-4BB8-AC6F-B6D908E17C5D}"
         "UpgradeCode" = "8:{F7C5D9BF-A304-4B5B-91D5-594E238E7264}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
