@@ -76,6 +76,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
     }
     "Deployable"
@@ -180,16 +188,16 @@
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:PortWatcher 1.0.0"
-        "ProductCode" = "8:{FAC62705-1406-4BF7-97B2-DC9223521BA5}"
-        "PackageCode" = "8:{88EF4CE5-7B17-4BB8-AC6F-B6D908E17C5D}"
+        "ProductName" = "8:PortWatcher 1.0.1"
+        "ProductCode" = "8:{39FAA030-C753-4D62-AAF6-586CFB243083}"
+        "PackageCode" = "8:{3B0EBBC5-0F3F-4EB2-B78E-6BEA55522038}"
         "UpgradeCode" = "8:{F7C5D9BF-A304-4B5B-91D5-594E238E7264}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.0.0"
+        "ProductVersion" = "8:1.0.1"
         "Manufacturer" = "8:PortWatcher"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"

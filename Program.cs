@@ -167,7 +167,7 @@ namespace PortWatcher
                     //Display any exception then continue 
                     Console.WriteLine(ex.ToString());
                 }
-                System.Threading.Thread.Sleep(1000);
+                System.Threading.Thread.Sleep(2000);
             } //end while
         }
 
@@ -189,7 +189,7 @@ namespace PortWatcher
                     SmtpClient smtp = new SmtpClient();
                     message.From = new MailAddress(_email);
                     message.To.Add(new MailAddress(_email));
-                    message.Subject = string.Format("PortWatch Notification Connections {0}", newConnections.Count); //vary subject to prevent gmail topic grouping
+                    message.Subject = string.Format("PortWatch Notification Connections {0} {1:yyyy-MM-dd HH:mm:ss}", newConnections.Count, DateTime.Now); //vary subject to prevent gmail topic grouping
                     smtp.Port = _smtpPort;
                     smtp.Host = _smtpAddr;
                     smtp.EnableSsl = _enableSsl;
