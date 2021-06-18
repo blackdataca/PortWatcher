@@ -8,6 +8,66 @@ using System.Text;
 
 namespace PortWatcher
 {
+    class Connection : IEquatable<Connection>
+    {
+        public DateTime TimeStamp { get; private set; }
+        public TcpConnectionInformation Conn { get; private set; }
+        public Connection(TcpConnectionInformation conn)
+        {
+            TimeStamp = DateTime.Now;
+            Conn = conn;
+        }
+
+  
+        public override string ToString() 
+        {
+                return string.Format("{0:yyyy-MM-dd HH:mm:ss}\t{1} <==> {2} ({3})", TimeStamp, Conn.LocalEndPoint.ToString(), Conn.RemoteEndPoint.ToString(), Conn.State);
+        }
+        public override bool Equals(object obj) => this.Equals(obj as Connection);
+
+        public bool Equals(Connection other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            // Optimization for a common success case.
+            if (Object.ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            // If run-time types are not exactly the same, return false.
+            if (this.GetType() != other.GetType())
+            {
+                return false;
+            }
+            return (Conn.LocalEndPoint.Address.ToString() == other.Conn.LocalEndPoint.Address.ToString() 
+                && Conn.RemoteEndPoint.Address.ToString() == other.Conn.RemoteEndPoint.Address.ToString() 
+                 && Conn.State == other.Conn.State);
+        }
+
+        public override int GetHashCode() => (Conn).GetHashCode();
+
+        public static bool operator ==(Connection lhs, Connection rhs)
+        {
+            if (lhs is null)
+            {
+                if (rhs is null)
+                {
+                    return true;
+                }
+
+                // Only the left side is null.
+                return false;
+            }
+            // Equals handles case of null on right side.
+            return lhs.Equals(rhs);
+        }
+
+        public static bool operator !=(Connection lhs, Connection rhs) => !(lhs == rhs);
+    }
     class Program
     {
         /// <summary>
@@ -123,43 +183,54 @@ namespace PortWatcher
 
             IPGlobalProperties ipProperties = IPGlobalProperties.GetIPGlobalProperties();
 
-            var oldConnections = new List<string>();
+            var oldConnections = new List<Connection>();
 
             while (true)
             {
                 try
                 {
-                    var newConnections = new List<string>();
+                    var newConnections = new List<Connection>();
 
                     TcpConnectionInformation[] tcpConnections = ipProperties.GetActiveTcpConnections();
 
+                    
                     foreach (TcpConnectionInformation c in tcpConnections)
                     {
                         foreach (string port in _ports)
                         {
                             if (c.LocalEndPoint.Port.ToString() == port || c.RemoteEndPoint.Port.ToString() == port)
                             {
-                                string connection = string.Format("{0} <==> {1} ({2})",
-                           c.LocalEndPoint.ToString(),
-                           c.RemoteEndPoint.ToString(), c.State);
-                                newConnections.Add(connection);
+                           //     string connection = string.Format("{0} <==> {1} ({2})",
+                           //c.LocalEndPoint.ToString(),
+                           //c.RemoteEndPoint.ToString(), c.State);
+                                var newConn = new Connection(c);
+                                bool found = false;
+                                foreach (var conn in oldConnections)
+                                {
+                                    if (conn == newConn)
+                                    {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if (!found)
+                                {
+                                    //Get new connections
+                                    newConnections.Add(newConn);
+                                    oldConnections.Add(newConn);
+                                }
                             }
                         }
                     }
-                    if (!Enumerable.SequenceEqual(oldConnections, newConnections))
+
+                    if (newConnections.Count>0)
                     {
                         Console.Beep();
                         Console.WriteLine("Connections: {0}", newConnections.Count);
                         foreach (var connection in newConnections)
                             Console.WriteLine(connection);
 
-                        if (newConnections.Count > oldConnections.Count)
-                        {
-                            SendNotification(newConnections);
-                        }
-
-                        oldConnections = newConnections.GetRange(0, newConnections.Count);
-
+                        SendNotification(newConnections);
                     }
                 }
                 catch (Exception ex)
@@ -176,7 +247,7 @@ namespace PortWatcher
         /// Sends email notification if email address is set
         /// </summary>
         /// <param name="newConnections"></param>
-        static void SendNotification(List<string> newConnections)
+        static void SendNotification(List<Connection> newConnections)
         {
             if (string.IsNullOrEmpty(_email))
                 return;
@@ -200,9 +271,10 @@ namespace PortWatcher
                     message.IsBodyHtml = false;
 
                     var bodyString = new StringBuilder();
+                    bodyString.AppendLine("Time\tLocal <==> Remote (Status)");
                     foreach (var conn in newConnections)
                     {
-                        bodyString.AppendLine(conn);
+                        bodyString.AppendLine(conn.ToString());
                     }
                     message.Body = bodyString.ToString();
                     smtp.Send(message);
