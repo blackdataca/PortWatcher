@@ -10,12 +10,17 @@ namespace PortWatcher
 {
     class Connection : IEquatable<Connection>
     {
-        public DateTime TimeStamp { get; private set; }
-        public TcpConnectionInformation Conn { get; private set; }
+        public bool Alerted;
+        public bool Alive;
+        public DateTime TimeStamp;
+        public TcpConnectionInformation Conn;
+
+
         public Connection(TcpConnectionInformation conn)
         {
-            TimeStamp = DateTime.Now;
+            Alive = true;
             Conn = conn;
+            TimeStamp = DateTime.Now;
         }
 
   
@@ -189,10 +194,14 @@ namespace PortWatcher
             {
                 try
                 {
+                    foreach (var conn in oldConnections)
+                    {
+                        conn.Alive = false;
+                    }
                     var newConnections = new List<Connection>();
-
+                    
                     TcpConnectionInformation[] tcpConnections = ipProperties.GetActiveTcpConnections();
-
+                    
                     
                     foreach (TcpConnectionInformation c in tcpConnections)
                     {
@@ -200,16 +209,15 @@ namespace PortWatcher
                         {
                             if (c.LocalEndPoint.Port.ToString() == port || c.RemoteEndPoint.Port.ToString() == port)
                             {
-                           //     string connection = string.Format("{0} <==> {1} ({2})",
-                           //c.LocalEndPoint.ToString(),
-                           //c.RemoteEndPoint.ToString(), c.State);
+
                                 var newConn = new Connection(c);
                                 bool found = false;
-                                foreach (var conn in oldConnections)
+                                foreach (var oldConn in oldConnections)
                                 {
-                                    if (conn == newConn)
+                                    if (oldConn == newConn)
                                     {
                                         found = true;
+                                        oldConn.Alive = true;
                                         break;
                                     }
                                 }
@@ -223,15 +231,23 @@ namespace PortWatcher
                         }
                     }
 
+                    for (int i=oldConnections.Count-1;i>=0;i--)
+                    {
+                        if (!oldConnections[i].Alive)
+                            oldConnections.RemoveAt(i);
+                    }
+
                     if (newConnections.Count>0)
                     {
                         Console.Beep();
                         Console.WriteLine("Connections: {0}", newConnections.Count);
                         foreach (var connection in newConnections)
                             Console.WriteLine(connection);
-
-                        SendNotification(newConnections);
+    
                     }
+ 
+                    SendNotification(oldConnections);
+                
                 }
                 catch (Exception ex)
                 {
@@ -246,10 +262,22 @@ namespace PortWatcher
         /// <summary>
         /// Sends email notification if email address is set
         /// </summary>
-        /// <param name="newConnections"></param>
-        static void SendNotification(List<Connection> newConnections)
+        /// <param name="connections"></param>
+        static void SendNotification(List<Connection> connections)
         {
             if (string.IsNullOrEmpty(_email))
+                return;
+
+            var alertConns = new List<Connection>();
+            foreach (var conn in connections)
+            {
+                if (!conn.Alerted && conn.TimeStamp.AddSeconds(2)<DateTime.Now)
+                {
+                    conn.Alerted = true;
+                    alertConns.Add(conn);
+                }
+            }
+            if (alertConns.Count == 0)
                 return;
 
             Console.Write("Sending email...");
@@ -260,7 +288,7 @@ namespace PortWatcher
                     SmtpClient smtp = new SmtpClient();
                     message.From = new MailAddress(_email);
                     message.To.Add(new MailAddress(_email));
-                    message.Subject = string.Format("PortWatch Notification Connections {0} {1:yyyy-MM-dd HH:mm:ss}", newConnections.Count, DateTime.Now); //vary subject to prevent gmail topic grouping
+                    message.Subject = string.Format("PortWatch Notification Connections {0} {1:yyyy-MM-dd HH:mm:ss}", connections.Count, DateTime.Now); //vary subject to prevent gmail topic grouping
                     smtp.Port = _smtpPort;
                     smtp.Host = _smtpAddr;
                     smtp.EnableSsl = _enableSsl;
@@ -272,7 +300,7 @@ namespace PortWatcher
 
                     var bodyString = new StringBuilder();
                     bodyString.AppendLine("Time\tLocal <==> Remote (Status)");
-                    foreach (var conn in newConnections)
+                    foreach (var conn in alertConns)
                     {
                         bodyString.AppendLine(conn.ToString());
                     }
